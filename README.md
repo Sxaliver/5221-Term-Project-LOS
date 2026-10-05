@@ -2,6 +2,45 @@
 
 目标：评价中国某信号交叉口的机动车和行人服务水平。此工具实现 **OpenCV 读取视频 → YOLO 检测 → ByteTrack / BoT-SORT 跟踪 → 交通事件提取 → CSV 汇总**。视频在自己的电脑运行，代码和经复核的汇总结果可保存到 GitHub。
 
+## Windows + NVIDIA：在 VS Code 中部署与导入视频
+
+代码尚在开发分支时，首次下载：
+
+```powershell
+git clone --branch feature/local-traffic-analysis https://github.com/Sxaliver/5221-Term-Project-LOS.git
+cd 5221-Term-Project-LOS
+code .
+```
+
+已有该分支的本地副本则直接 `git pull`。在 VS Code 中打开**仓库根目录**，安装推荐的 Python 扩展。先准备官方 Python 3.12（包含 Python Launcher 与 Tcl/Tk）及可用的 NVIDIA 显卡驱动；在终端中 `py -3.12 --version` 和 `nvidia-smi` 应能运行。
+
+通过菜单 **Terminal → Run Task（终端 → 运行任务）** 按顺序选择：
+
+1. **Traffic: Deploy NVIDIA GPU**：建立项目独立 `.venv`，检查驱动支持的 CUDA，安装对应 GPU 版 PyTorch、下载 `models/yolo11n.pt`，运行测试及真实 GPU 推理/跟踪自检。只有成功后才保存 `.local/deployment.json`。首次下载 PyTorch 及其 GPU 依赖需要数 GB 空间。
+2. **Traffic: Annotate video**：文件选择窗口导入本机 MPG/MP4，自动打开标注页面。标注后把下载的 `scene.json` 保存到 `configs/`。
+3. **Traffic: Pilot (2 min)**：依次选择视频和标注 JSON，用已验证的 GPU 配置分析前两分钟，生成复核录像和 CSV；每次试运行用独立输出目录，便于调整标注再比较。
+4. **Traffic: Analyze full video**：复核后选择完整视频和同一 JSON，处理完整录像；同参数已完成文件可跳过，中断的视频保留结果后重跑。
+
+也可在 VS Code PowerShell 终端先执行一条部署命令，无需手动激活虚拟环境：
+
+```powershell
+py -3.12 tools\bootstrap_local.py --accelerator cuda
+```
+
+脚本依据驱动的 CUDA 支持选择官方 `cu128` 或 `cu126` 安装源，并为旧架构优先选择 `cu126`。不需要另行安装系统 CUDA Toolkit。若驱动过旧、显卡架构不受支持或 GPU 推理失败，会明确报错；不会静默改为 CPU 成功。部署失败后的旧成功标记会失效。
+
+VS Code 任务固定使用项目 `.venv`。调试功能（F5）请通过 **Python: Select Interpreter** 选择 `.venv\Scripts\python.exe`；已有工作区曾选过其他解释器时，默认设置不会覆盖那次选择。
+
+原始视频可以保留在任意本地磁盘，不需上传或复制进项目。文件选择框不可用时，可显式传入路径：
+
+```powershell
+.venv\Scripts\python.exe tools\run_video.py --mode pilot --video "D:\Videos\JF Ave-TJ St_1.MPG" --scene configs\jf_tj.scene.json
+```
+
+结果位于 `runs/vscode-pilot-<时间>/` 或 `runs/vscode-full/`。全片分析若修改配置、模型或版本，请用后文 CLI 的新 `--output` 目录，避免混用不同分析结果。`Traffic: Deploy CPU` 是显式的备用选项；选择后会重新验证 CPU 并记录 CPU 配置，不代表 GPU 部署完成。
+
+当前云端任务不能直接执行你本机的 VS Code 命令；Windows/GPU 是否就绪，以本机部署任务输出的 `READY: device=0`、实际 `model_device=cuda:0` 和本机视频试运行结果为准。
+
 ## 已实现与测量边界
 
 | 输出 | 用途 | 边界 |

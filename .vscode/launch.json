@@ -1,0 +1,23 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Traffic: GPU readiness check",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "traffic_los.doctor",
+      "args": ["--model", "models/yolo11n.pt", "--device", "0", "--report", ".local/deployment.json"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Traffic: Import video (2 min pilot)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/tools/run_video.py",
+      "args": ["--mode", "pilot"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    }
+  ]
+}
