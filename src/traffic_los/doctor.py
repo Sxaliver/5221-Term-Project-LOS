@@ -9,6 +9,7 @@ import tempfile
 
 def check(model_path, device):
     import cv2
+    import numpy as np
     import torch
     import ultralytics
     from ultralytics import YOLO
@@ -21,7 +22,8 @@ def check(model_path, device):
     model_path = Path(model_path).resolve()
     model_path.parent.mkdir(parents=True, exist_ok=True)
     # Ultralytics uses its official release download when this file is absent.
-    image = cv2.imread(str(Path(ultralytics.__file__).parent / "assets" / "bus.jpg"))
+    image_path = Path(ultralytics.__file__).parent / "assets" / "bus.jpg"
+    image = cv2.imdecode(np.frombuffer(image_path.read_bytes(), dtype=np.uint8), cv2.IMREAD_COLOR)
     if image is None:
         raise ValueError("packaged model test image missing")
     h, w = image.shape[:2]

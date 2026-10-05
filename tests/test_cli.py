@@ -94,7 +94,7 @@ def test_duration_limit_and_interrupted_output_preservation(prepared):
 def test_annotation_page_uses_source_dimensions(prepared, tmp_path):
     args = SimpleNamespace(video=prepared.inputs[0], at=0, output=str(tmp_path / "annotator.html"))
     annotate(args)
-    page = Path(args.output).read_text()
+    page = Path(args.output).read_text(encoding="utf-8")
     assert 'width="100" height="100"' in page and "data:image/jpeg;base64," in page
     assert "scene.json" in page
     with pytest.raises(ValueError, match="overwrite"):
@@ -112,3 +112,19 @@ def test_export_only_completed_summaries(prepared, tmp_path):
     assert meta["settings"]["source"] == "video.mp4"
     with pytest.raises(ValueError, match="overwrite"):
         export(args)
+
+
+def test_chinese_scene_labels_resume_with_utf8_metadata(prepared):
+    path = Path(prepared.scene)
+    scene = json.loads(path.read_text(encoding="utf-8"))
+    scene["lines"][0]["name"] = "北进口"
+    scene["lines"][1]["name"] = "南出口"
+    path.write_text(json.dumps(scene, ensure_ascii=False), encoding="utf-8")
+    analyze(prepared)
+    result = next(Path(prepared.output).iterdir())
+    meta = json.loads((result / "metadata.json").read_text(encoding="utf-8"))
+    assert meta["settings"]["scene"]["lines"][0]["name"] == "北进口"
+    with (result / "events.csv").open(encoding="utf-8") as f:
+        assert list(csv.DictReader(f))[-1]["entry"] == "北进口"
+    prepared.resume = True
+    analyze(prepared)

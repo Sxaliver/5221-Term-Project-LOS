@@ -118,7 +118,7 @@ def analyze(args):
                     "track_sample_seconds": args.track_sample_seconds, "device": args.device,
                     "duration_limit_s": args.duration, "overlay_seconds": args.overlay_seconds}
         if target.exists():
-            saved = json.loads((target / "metadata.json").read_text())
+            saved = json.loads((target / "metadata.json").read_text(encoding="utf-8"))
             if args.resume and saved.get("settings") == metadata and saved.get("complete"):
                 print(f"Skip completed: {video.name}")
                 continue
@@ -130,7 +130,7 @@ def analyze(args):
             partial.rename(backup)
             print(f"Preserved interrupted output: {backup}; restarting video from frame 0")
         partial.mkdir()
-        (partial / "metadata.json").write_text(json.dumps({"settings": metadata, "complete": False}, indent=2))
+        (partial / "metadata.json").write_text(json.dumps({"settings": metadata, "complete": False}, indent=2), encoding="utf-8")
         cap = cv2.VideoCapture(str(video))
         handles = []
         overlay = None
