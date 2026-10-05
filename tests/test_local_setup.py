@@ -20,6 +20,16 @@ def test_cuda_wheel_selection(version, expected):
     assert bootstrap.cuda_index(f"CUDA Version: {version}") == expected
 
 
+@pytest.mark.parametrize("header", [
+    "NVIDIA-SMI 616.92    KMD Version: 616.92    CUDA UMD Version: 13.4",
+    "CUDA UMD Version : 13.4",
+    "cuda version: 12.8",
+])
+def test_new_nvidia_smi_header_selects_supported_pytorch_wheel(header):
+    bootstrap = load_tool("bootstrap_local")
+    assert bootstrap.cuda_index(header, compute_capability=8.6) == "cu128"
+
+
 def test_cuda_legacy_architecture_and_old_driver():
     bootstrap = load_tool("bootstrap_local")
     assert bootstrap.cuda_index("CUDA Version: 12.8", compute_capability=6.1) == "cu126"

@@ -12,9 +12,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def cuda_index(output, compute_capability=None):
-    match = re.search(r"CUDA Version:\s*(\d+)\.(\d+)", output)
+    # Recent NVIDIA-SMI versions label this field "CUDA UMD Version".
+    match = re.search(r"\bCUDA(?:\s+UMD)?\s+Version\s*:\s*(\d+)\.(\d+)\b", output, re.IGNORECASE)
     if not match:
-        raise ValueError("nvidia-smi did not report CUDA support; update/check the NVIDIA driver")
+        raise ValueError("nvidia-smi did not report a recognized CUDA version field; inspect its full output to distinguish a parsing issue from unavailable CUDA")
     version = tuple(map(int, match.groups()))
     # CUDA 12.8 PyTorch wheels drop support for some older architectures.
     # Prefer CUDA 12.6 for legacy hardware and still require real inference.
