@@ -27,3 +27,6 @@ jobs:
           python -m pytest -q
       - name: Verify actual model and trackers on CPU
         run: python -m traffic_los.doctor --model models/yolo11n.pt --device cpu --report .local/deployment.json
+      - name: Smoke check Windows read-only Up-key capture
+        if: runner.os == 'Windows'
+        run: python tools/diagnose_up_key.py --seconds 0.3 --skip-inventory --output .local/up-key-ci.json
