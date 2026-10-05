@@ -71,6 +71,23 @@ def test_expired_states_are_removed():
     assert not engine.states
 
 
+def test_pedestrian_and_vehicle_zones_filter_classes_and_keep_legacy_behavior():
+    config = scene()
+    polygon = config["zones"][0]["points"]
+    config["zones"] += [{"name": "ped_wait", "points": polygon, "classes": ["person"]},
+                        {"name": "left_wait", "points": polygon, "classes": ["car", "bus"]}]
+    validate(config)
+    _, counts = EventEngine(config).update(0, [det(50), det(50, 2, "person"), det(50, 3, "bicycle")])
+    assert counts[("ped_wait", "person")] == 1
+    assert counts[("ped_wait", "car")] == 0
+    assert counts[("left_wait", "car")] == 1
+    assert counts[("left_wait", "person")] == 0
+    assert counts[("area", "bicycle")] == 1
+    config["zones"][0]["classes"] = "person"
+    with pytest.raises(ValueError, match="classes"):
+        validate(config)
+
+
 def test_polygon_and_validation():
     config = scene()
     validate(config)

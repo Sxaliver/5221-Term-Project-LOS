@@ -18,5 +18,8 @@ traffic-los = "traffic_los.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+traffic_los = ["annotation.html"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

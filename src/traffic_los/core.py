@@ -36,6 +36,9 @@ def validate(config):
         if not isinstance(name, str) or not name or name in names:
             raise ValueError("line/zone names must be nonempty and unique")
         names.add(name)
+        if "classes" in item and (not isinstance(item["classes"], list) or
+                                   not all(isinstance(c, str) for c in item["classes"])):
+            raise ValueError("classes must be a list of class names")
         points = item.get("points", [])
         if (item in config.get("lines", []) and len(points) != 2) or len(points) < 2:
             raise ValueError("lines require two points")
@@ -72,6 +75,8 @@ class EventEngine:
             tid, cls, p = det["id"], det["class"], det["point"]
             state = self.states.setdefault(tid, {"last": time, "lines": {}, "seen": set(), "entry": None, "moved": False})
             for zone in self.config.get("zones", []):
+                if zone.get("classes") and cls not in zone["classes"]:
+                    continue
                 if inside(p, zone["points"]):
                     occupancy[(zone["name"], cls)] += 1
             for line in self.config.get("lines", []):
