@@ -1,0 +1,32 @@
+name: Tests
+on:
+  push:
+  pull_request:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install CPU dependencies
+        run: |
+          python -m pip install torch==2.9.0 torchvision==0.24.0 --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -e '.[test]'
+      - name: Check dependencies and statistics
+        run: |
+          python -m pip check
+          python -m pytest -q
+      - name: Verify actual model and trackers on CPU
+        run: python -m traffic_los.doctor --model models/yolo11n.pt --device cpu --report .local/deployment.json
+      - name: Smoke check Windows read-only Up-key capture
+        if: runner.os == 'Windows'
+        run: python tools/diagnose_up_key.py --seconds 0.3 --skip-inventory --output .local/up-key-ci.json

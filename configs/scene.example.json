@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "width": 640,
+  "height": 480,
+  "lines": [
+    {"name": "north_entry", "role": "entry", "direction": "positive", "points": [[100, 100], [540, 100]], "classes": ["car", "bus", "truck", "motorcycle", "bicycle"]},
+    {"name": "south_exit", "role": "exit", "direction": "positive", "points": [[100, 380], [540, 380]], "classes": ["car", "bus", "truck", "motorcycle", "bicycle"]},
+    {"name": "pedestrian_crosswalk", "role": "count", "direction": "both", "points": [[320, 100], [320, 380]], "classes": ["person"]}
+  ],
+  "zones": [{"name": "visible_waiting_area", "points": [[100, 20], [540, 20], [540, 100], [100, 100]]}]
+}

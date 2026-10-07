@@ -1,0 +1,50 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Traffic: Deploy NVIDIA GPU",
+      "type": "process",
+      "command": "python3",
+      "args": ["tools/bootstrap_local.py", "--accelerator", "cuda"],
+      "windows": {"command": "py", "args": ["-3.12", "tools/bootstrap_local.py", "--accelerator", "cuda"]},
+      "options": {"cwd": "${workspaceFolder}"},
+      "problemMatcher": []
+    },
+    {
+      "label": "Traffic: Deploy CPU",
+      "type": "process",
+      "command": "python3",
+      "args": ["tools/bootstrap_local.py", "--accelerator", "cpu"],
+      "windows": {"command": "py", "args": ["-3.12", "tools/bootstrap_local.py", "--accelerator", "cpu"]},
+      "options": {"cwd": "${workspaceFolder}"},
+      "problemMatcher": []
+    },
+    {
+      "label": "Traffic: Annotate video",
+      "type": "process",
+      "command": "${workspaceFolder}/.venv/bin/python",
+      "windows": {"command": "${workspaceFolder}\\.venv\\Scripts\\python.exe"},
+      "args": ["tools/run_video.py", "--mode", "annotate"],
+      "options": {"cwd": "${workspaceFolder}"},
+      "problemMatcher": []
+    },
+    {
+      "label": "Traffic: Pilot (2 min)",
+      "type": "process",
+      "command": "${workspaceFolder}/.venv/bin/python",
+      "windows": {"command": "${workspaceFolder}\\.venv\\Scripts\\python.exe"},
+      "args": ["tools/run_video.py", "--mode", "pilot"],
+      "options": {"cwd": "${workspaceFolder}"},
+      "problemMatcher": []
+    },
+    {
+      "label": "Traffic: Analyze full video",
+      "type": "process",
+      "command": "${workspaceFolder}/.venv/bin/python",
+      "windows": {"command": "${workspaceFolder}\\.venv\\Scripts\\python.exe"},
+      "args": ["tools/run_video.py", "--mode", "full"],
+      "options": {"cwd": "${workspaceFolder}"},
+      "problemMatcher": []
+    }
+  ]
+}
